@@ -12,11 +12,11 @@ class TestUserLogin:
 
         response = api_manager.admin_steps.login_user(login_user_request)
 
-        assert login_user_request.username == response.user.username
-        assert response.user.role == "ROLE_ADMIN"
+        assert login_user_request.username == response.user.username, 'Создали другого пользователя'
+        assert response.user.role == "ROLE_ADMIN", 'Роль отличается от Admin'
 
     def test_login_user(self, api_manager, create_user_request):
         response = api_manager.admin_steps.login_user(create_user_request)
 
-        assert create_user_request.username == response.user.username
-        assert response.user.role == "ROLE_USER"
+        assert create_user_request.username == response.user.username, 'Создали другого пользователя'
+        assert response.user.role == "ROLE_USER", 'Роль отличается от User'

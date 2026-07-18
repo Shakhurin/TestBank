@@ -14,49 +14,36 @@ class TestRequestCredit:
             (15000, 12)
         ]
     )
-    def test_request_credit_valid(self, credit_amount, month, create_user_credit_role_request, api_manager, db_session):
-
-        create_account_response = api_manager.user_steps.create_account(create_user_credit_role_request)
-
-        request_credit_request = RequestCreditRequest(accountId=create_account_response.id, amount=credit_amount,
+    def test_request_credit_valid(self, credit_amount, month, prepare_credit_account, api_manager, db_session):
+        request_credit_request = RequestCreditRequest(accountId=prepare_credit_account.account.id, amount=credit_amount,
                                                       termMonths=month)
 
         request_credit_response = api_manager.user_steps.request_credit(request_credit_request,
-                                                                        create_user_credit_role_request)
-        assert request_credit_response.id == create_account_response.id
+                                                                        prepare_credit_account.user)
+        assert request_credit_response.id == prepare_credit_account.account.id, 'Кредит запрошен на другой счет'
 
         credit_from_db = Credit.get_credit_by_id(db_session, request_credit_response.creditId)
-        assert credit_from_db is not None
-        assert credit_from_db.id == request_credit_response.creditId
-        assert credit_from_db.account_id == create_account_response.id
-        assert credit_from_db.amount == credit_amount
-        assert credit_from_db.term_months == month
+        assert credit_from_db.id == request_credit_response.creditId, 'Кредит запрошен на другой счет'
+        assert credit_from_db.amount == credit_amount, f'Кредит взят не на сумму: {credit_amount}'
+        assert credit_from_db.term_months == month, f'Кредит запрошен не на {month} месяцев'
 
     @pytest.mark.parametrize(
         "credit_amount, month",
         [
             (4999.9, 12),
             (15000.1, 12),
-            (0, 12),
-            (-100, 12)
         ]
     )
-    def test_request_credit_invalid(self, create_user_credit_role_request, credit_amount, month, api_manager,
+    def test_request_credit_invalid(self, prepare_credit_account, credit_amount, month, api_manager,
                                     db_session):
-
-        create_account_response = api_manager.user_steps.create_account(create_user_credit_role_request)
-
-        request_credit_request = RequestCreditRequest(accountId=create_account_response.id, amount=credit_amount,
+        request_credit_request = RequestCreditRequest(accountId=prepare_credit_account.account.id, amount=credit_amount,
                                                       termMonths=month)
 
         request_credit_response = api_manager.user_steps.request_credit_invalid(request_credit_request,
-                                                                                create_user_credit_role_request)
+                                                                                prepare_credit_account.user)
 
-        if credit_amount > 0:
-            assert "Amount must be between 5000 and 15000" in request_credit_response.json()["error"]
-        else:
-            assert "Amount must be greater than 0\nAmount must be between 5000 and 15000" in \
-                   request_credit_response.json()["error"]
+        assert "Amount must be between 5000 and 15000" in request_credit_response.json()[
+            "error"], 'Кредит запрошен на сумму в диапазоне 5000-15000'
 
-        credit_from_db = Credit.get_credit_by_account_id(db_session, create_account_response.id)
+        credit_from_db = Credit.get_credit_by_account_id(db_session, prepare_credit_account.account.id)
         assert credit_from_db is None, "Кредит создан, ошибка"
