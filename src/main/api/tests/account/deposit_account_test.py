@@ -36,7 +36,8 @@ class TestDepositAccount:
             9000.01
         ]
     )
-    def test_deposit_account_invalid_positive_nums(self, amount, empty_account, create_user_request,api_manager, db_session):
+    def test_deposit_account_invalid_positive_nums(self, amount, empty_account, create_user_request, api_manager,
+                                                   db_session):
         deposit_account_request = DepositAccountRequest(
             accountId=empty_account.id,
             amount=amount
@@ -45,7 +46,8 @@ class TestDepositAccount:
         deposit_account_response = api_manager.user_steps.deposit_account_invalid(deposit_account_request,
                                                                                   create_user_request)
 
-        assert deposit_account_response.json()["error"] == "Amount must be between 1000 and 9000"
+        assert deposit_account_response.json()[
+                   "error"] == "Amount must be between 1000 and 9000", 'Сумма в диапазоне 1000-9000'
 
         db_account = AccountCrudDb.get_account_by_id(db_session, empty_account.id)
         assert db_account.balance == 0, 'Баланс не равен нулю'
