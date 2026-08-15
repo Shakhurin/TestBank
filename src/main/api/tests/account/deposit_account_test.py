@@ -1,9 +1,13 @@
 import pytest
+from requests import Session
 
+from src.main.api.classes.api_manager import ApiManager
 from src.main.api.fixtures.api_fixture import api_manager
 from src.main.api.fixtures.user_fixture import create_user_request
+from src.main.api.models.account.create_account_response import CreateAccountResponse
 from src.main.api.models.account.deposit_account_request import DepositAccountRequest
 from src.main.api.db.crud.account_crud import AccountCrudDb
+from src.main.api.models.user.create_user_request import CreateUserRequest
 
 
 @pytest.mark.api
@@ -16,7 +20,8 @@ class TestDepositAccount:
             9000
         ]
     )
-    def test_deposit_account_valid(self, amount, prepare_empty_account, create_user_request, api_manager, db_session):
+    def test_deposit_account_valid(self, amount: float, prepare_empty_account: CreateAccountResponse,
+                                   create_user_request: CreateUserRequest, api_manager: ApiManager, db_session: Session):
         deposit_account_request = DepositAccountRequest(
             accountId=prepare_empty_account.id,
             amount=amount
@@ -36,10 +41,11 @@ class TestDepositAccount:
             9000.01
         ]
     )
-    def test_deposit_account_invalid_positive_nums(self, amount, empty_account, create_user_request, api_manager,
-                                                   db_session):
+    def test_deposit_account_invalid_positive_nums(self, amount: float, prepare_empty_account: CreateAccountResponse,
+                                                   create_user_request: CreateUserRequest, api_manager: ApiManager,
+                                                   db_session: Session):
         deposit_account_request = DepositAccountRequest(
-            accountId=empty_account.id,
+            accountId=prepare_empty_account.id,
             amount=amount
         )
 
@@ -49,5 +55,5 @@ class TestDepositAccount:
         assert deposit_account_response.json()[
                    "error"] == "Amount must be between 1000 and 9000", 'Сумма в диапазоне 1000-9000'
 
-        db_account = AccountCrudDb.get_account_by_id(db_session, empty_account.id)
+        db_account = AccountCrudDb.get_account_by_id(db_session, prepare_empty_account.id)
         assert db_account.balance == 0, 'Баланс не равен нулю'

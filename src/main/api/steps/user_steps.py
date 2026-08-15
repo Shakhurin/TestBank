@@ -104,6 +104,6 @@ class UserSteps(BaseSteps):
                 password=create_user_credit_role_request.password
             ),
             Endpoint.CREDIT_REPAY,
-            ResponseSpecs.bad_or_request_unprocess()
+            ResponseSpecs.request_unauthorized()
         ).post(repay_credit_request)
         return response

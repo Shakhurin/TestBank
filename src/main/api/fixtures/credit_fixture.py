@@ -2,6 +2,7 @@ import dataclasses
 
 import pytest
 
+from src.main.api.classes.api_manager import ApiManager
 from src.main.api.fixtures.acount_fixture import PreparedCreditAccount
 from src.main.api.models.account.create_account_response import CreateAccountResponse
 from src.main.api.models.credit.request_credit_request import RequestCreditRequest
@@ -18,7 +19,7 @@ class PrepareRequestCredit:
 
 
 @pytest.fixture
-def prepare_request_credit_account(prepare_credit_account, api_manager, request):
+def prepare_request_credit_account(prepare_credit_account: PreparedCreditAccount, api_manager: ApiManager, request) -> PrepareRequestCredit:
     credit_amount = request.param
     request_credit_request = RequestCreditRequest(accountId=prepare_credit_account.account.id, amount=credit_amount, termMonths=12)
     request_credit_response = api_manager.user_steps.request_credit(request_credit_request, prepare_credit_account.user)

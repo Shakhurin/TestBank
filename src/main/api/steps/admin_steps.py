@@ -1,5 +1,3 @@
-from http.client import responses
-
 from src.main.api.foundation.endpoint import Endpoint
 from src.main.api.foundation.requesters.crud_requester import CrudRequester
 from src.main.api.foundation.requesters.validate_crud_requester import ValidateCrudRequester
@@ -24,11 +22,17 @@ class AdminSteps(BaseSteps):
         return response
 
     def delete_user(self, user_id: int):
-        CrudRequester(
+        response = CrudRequester(
             RequestSpecs.auth_headers(username="admin", password="123456"),
             Endpoint.ADMIN_DELETE_USER,
             ResponseSpecs.request_ok()
         ).delete(user_id)
+
+        self.created_obj[:] = [
+            user for user in self.created_obj if user.id != user_id
+        ]
+
+        return response
 
     def create_invalid_user(self, create_user_request: CreateUserRequest):
         CrudRequester(
@@ -45,5 +49,13 @@ class AdminSteps(BaseSteps):
             RequestSpecs.unauth_headers(),
             Endpoint.LOGIN_USER,
             ResponseSpecs.request_ok()
+        ).post(login_user_request)
+        return response
+
+    def login_user_invalid(self, login_user_request: LoginUserRequest):
+        response = CrudRequester(
+            RequestSpecs.unauth_headers(),
+            Endpoint.LOGIN_USER,
+            ResponseSpecs.request_unauthorized()
         ).post(login_user_request)
         return response

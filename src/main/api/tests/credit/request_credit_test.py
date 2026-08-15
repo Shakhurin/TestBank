@@ -1,5 +1,8 @@
 import pytest
+from requests import Session
 
+from src.main.api.classes.api_manager import ApiManager
+from src.main.api.fixtures.acount_fixture import PreparedCreditAccount
 from src.main.api.fixtures.api_fixture import api_manager
 from src.main.api.fixtures.db_fixture import db_session
 from src.main.api.models.credit.request_credit_request import RequestCreditRequest
@@ -14,7 +17,8 @@ class TestRequestCredit:
             (15000, 12)
         ]
     )
-    def test_request_credit_valid(self, credit_amount, month, prepare_credit_account, api_manager, db_session):
+    def test_request_credit_valid(self, credit_amount:float, month: int, prepare_credit_account: PreparedCreditAccount,
+                                  api_manager: ApiManager, db_session: Session):
         request_credit_request = RequestCreditRequest(accountId=prepare_credit_account.account.id, amount=credit_amount,
                                                       termMonths=month)
 
@@ -34,8 +38,8 @@ class TestRequestCredit:
             (15000.1, 12),
         ]
     )
-    def test_request_credit_invalid(self, prepare_credit_account, credit_amount, month, api_manager,
-                                    db_session):
+    def test_request_credit_invalid(self, prepare_credit_account: PreparedCreditAccount, credit_amount: float, month: int,
+                                    api_manager: ApiManager, db_session: Session):
         request_credit_request = RequestCreditRequest(accountId=prepare_credit_account.account.id, amount=credit_amount,
                                                       termMonths=month)
 

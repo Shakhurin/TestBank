@@ -22,7 +22,7 @@ class ResponseSpecs:
         return confirm
 
     @staticmethod
-    def bad_or_request_unprocess():
+    def request_unauthorized():
         def confirm(response: Response):
-            assert response.status_code in [HTTPStatus.UNPROCESSABLE_ENTITY, HTTPStatus.BAD_REQUEST], response.text
+            assert response.status_code == HTTPStatus.UNAUTHORIZED, response.text
         return confirm

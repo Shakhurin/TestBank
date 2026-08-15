@@ -1,9 +1,12 @@
 import pytest
+from requests import Session
 
+from src.main.api.classes.api_manager import ApiManager
 from src.main.api.db.crud.account_crud import AccountCrudDb
+from src.main.api.fixtures.acount_fixture import PreparedTransferAccounts
 from src.main.api.fixtures.api_fixture import api_manager
-from src.main.api.models.account.deposit_account_request import DepositAccountRequest
 from src.main.api.models.account.transfer_account_request import TransferAccountRequest
+from src.main.api.models.user.create_user_request import CreateUserCreditRoleRequest
 
 
 @pytest.mark.api
@@ -16,8 +19,9 @@ class TestTransferAccount:
             10000
         ]
     )
-    def test_transfer_account_valid(self, prepared_transfer_accounts, transfer_amount, create_user_request, api_manager,
-                                    db_session):
+    def test_transfer_account_valid(self, prepared_transfer_accounts: PreparedTransferAccounts, transfer_amount: float,
+                                    create_user_request: CreateUserCreditRoleRequest, api_manager: ApiManager,
+                                    db_session: Session):
         transfer_account_request = TransferAccountRequest(
             fromAccountId=prepared_transfer_accounts.from_account.id,
             toAccountId=prepared_transfer_accounts.to_account.id,
@@ -43,8 +47,10 @@ class TestTransferAccount:
             10000.1,
         ]
     )
-    def test_transfer_account_invalid(self, prepared_transfer_accounts, transfer_amount, api_manager,
-                                      create_user_request):
+    def test_transfer_account_invalid(self, prepared_transfer_accounts: PreparedTransferAccounts,
+                                      transfer_amount: float,
+                                      api_manager: ApiManager,
+                                      create_user_request: CreateUserCreditRoleRequest):
         transfer_account_request = TransferAccountRequest(
             fromAccountId=prepared_transfer_accounts.from_account.id,
             toAccountId=prepared_transfer_accounts.to_account.id,
